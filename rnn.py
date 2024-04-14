@@ -14,4 +14,9 @@ class rnn:
         self.y = y
         self.num_layers = num_layers
         self.num_neurons = num_neurons
-        
+    def initialize_parameters(self, W, U, V):
+        return 0;
+    def feedforward(self, W, U, V):
+        return 0;
+    def back_prop(self):
+        return 0;
