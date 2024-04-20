@@ -10,20 +10,24 @@ This file will contain the rnn class and its methods
 import numpy as np
 
 class RNN:
-    def __int__(self, X, y, num_layers, num_neurons, seq_length, num_features):
+    def __int__(self, X, y, num_layers, num_neurons, seq_length, num_features, num_batches, learning_rate):
         self.X = X
         self.y = y
         self.num_layers = num_layers
         self.num_neurons = num_neurons
         self.seq_length = seq_length
         self.num_features = num_features
-    def initialize_parameters(self, W_xh, W_hh, W_hy, b_hh):
+        self.num_batches = num_batches
+        self.batch_size = len(X)/num_batches
+        self.learning_rate = learning_rate
+    def initialize_parameters(self):
         Wxh = np.random.rand(self.num_features, self.num_neurons)
         W_hh = np.random.rand(self.num_neurons,self.num_neurons)
         W_hy = np.random.rand(self.num_neurons, self.num_features)
         b_hh = np.random.rand(self.num_neurons)
     def feedforward(self, W_xh, W_hh, W_hy,b_hh):
-        return 0
+        output, h_t = 1, 1
+        return output, h_t
     def back_prop(self, W_xh, W_hh, W_hy, dL, h_t):
         for t in range(self.seq_length-1,-1,-1):
             if t == (self.seq_length-1):
@@ -35,13 +39,21 @@ class RNN:
             dW_xh = np.matmul(dh_raw, np.array(self.X[t]).transpose())
             dW_hh = np.matmul(dh_raw, np.array(h_t[t-1]).transpose())
             dh_next = np.matmul(np.array(W_hh).transpose(), dh_raw)
-    def calc_loss(self, y_target, y_model, loss_function:str):
+
+        return dW_xh, dW_hh, dW_hy, db_hh
+    def calc_loss(self, y_target, y_model, loss_function = "MSE"):
         if loss_function == "MSE":
             L = 0.5*(y_target - y_model)**2
             dL = y_target - y_model
             return L, dL
-
-
     def update_weights(self):
-        return 0
+        pass
+    def rnn(self, W_xh, W_hh, W_hy, b_hh):
+        output, h_t = self.feedforward(W_xh, W_hh, W_hy,b_hh)
+        L, dL = self.calc_loss(y_target=self.y[seq], y_model=output)
+        dW_xh, dW_hh, dW_hy, db_hh = self.back_prop(W_xh, W_hh, W_hy, dL, h_t)
+        W_xh, W_hh, W_hy, b_hh = self.update_weights
+
+        return output
+
 
