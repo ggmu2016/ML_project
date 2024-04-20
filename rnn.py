@@ -57,13 +57,17 @@ class RNN:
             L = 0.5*(y_target - y_model)**2
             dL = y_target - y_model
             return L, dL
-    def update_weights(self):
-        pass
+    def update_weights(self, dW_xh, dW_hh, dW_hy, db_hh):
+        # Update weights and biases using SGD
+        self.Wxh -= self.learning_rate * dW_xh
+        self.Whh -= self.learning_rate * dW_hh
+        self.Why -= self.learning_rate * dW_hy
+        self.bh -= self.learning_rate * db_hh
     def rnn(self, W_xh, W_hh, W_hy, b_hh):
         output, h_t = self.forward_prop(W_xh, W_hh, W_hy,b_hh)
         L, dL = self.calc_loss(y_target=self.y[seq], y_model=output)
         dW_xh, dW_hh, dW_hy, db_hh = self.back_prop(W_xh, W_hh, W_hy, dL, h_t)
-        W_xh, W_hh, W_hy, b_hh = self.update_weights
+        self.update_weights(dW_xh, dW_hh, dW_hy, db_hh)
 
         return output
 
