@@ -25,9 +25,20 @@ class RNN:
         W_hh = np.random.rand(self.num_neurons,self.num_neurons)
         W_hy = np.random.rand(self.num_neurons, self.num_features)
         b_hh = np.random.rand(self.num_neurons)
-    def feedforward(self, W_xh, W_hh, W_hy,b_hh):
-        output, h_t = 1, 1
-        return output, h_t
+    def forward_prop(self, W_xh, W_hh, W_hy, b_hh):
+        outputs = []
+        hidden_states = []
+        h_t = np.zeros((self.num_neurons,))
+
+        for t in range(self.seq_length):
+            a_t = b_hh + np.dot(self.X[t], W_xh) + np.dot(h_t, W_hh)
+            h_t = np.tanh(a_t)
+            hidden_states.append(h_t)
+            output_t = np.dot(h_t, W_hy)
+            outputs.append(output_t)
+
+        return np.array(outputs), np.array(hidden_states)
+
     def back_prop(self, W_xh, W_hh, W_hy, dL, h_t):
         for t in range(self.seq_length-1,-1,-1):
             if t == (self.seq_length-1):
@@ -49,7 +60,7 @@ class RNN:
     def update_weights(self):
         pass
     def rnn(self, W_xh, W_hh, W_hy, b_hh):
-        output, h_t = self.feedforward(W_xh, W_hh, W_hy,b_hh)
+        output, h_t = self.forward_prop(W_xh, W_hh, W_hy,b_hh)
         L, dL = self.calc_loss(y_target=self.y[seq], y_model=output)
         dW_xh, dW_hh, dW_hy, db_hh = self.back_prop(W_xh, W_hh, W_hy, dL, h_t)
         W_xh, W_hh, W_hy, b_hh = self.update_weights
