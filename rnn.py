@@ -10,7 +10,8 @@ This file will contain the rnn class and its methods
 import numpy as np
 
 class RNN:
-    def __int__(self, X, y, num_layers, num_neurons, seq_length, num_features, num_batches, learning_rate):
+
+    def __init__(self, X, y, num_layers, num_neurons, seq_length, num_features, num_batches, learning_rate):
         self.X = X
         self.y = y
         self.num_layers = num_layers
@@ -20,11 +21,18 @@ class RNN:
         self.num_batches = num_batches
         self.batch_size = len(X)/num_batches
         self.learning_rate = learning_rate
-    def initialize_parameters(self):
-        Wxh = np.random.rand(self.num_features, self.num_neurons)
-        W_hh = np.random.rand(self.num_neurons,self.num_neurons)
-        W_hy = np.random.rand(self.num_neurons, self.num_features)
-        b_hh = np.random.rand(self.num_neurons)
+        self.W_xh = np.array([])
+        self.W_hh = np.array([])
+        self.W_hy = np.array([])
+        self.b_hh = np.array([])
+        self.__initialize_parameters(seed=50)
+
+    def __initialize_parameters(self, seed: int):
+        np.random.seed(seed)
+        self.W_xh = np.random.rand(self.num_features, self.num_neurons)
+        self.W_hh = np.random.rand(self.num_neurons,self.num_neurons)
+        self.W_hy = np.random.rand(self.num_neurons, self.num_features)
+        self.b_hh = np.random.rand(self.num_neurons)
     def forward_prop(self, W_xh, W_hh, W_hy, b_hh):
         outputs = []
         hidden_states = []
