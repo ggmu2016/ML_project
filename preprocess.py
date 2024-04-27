@@ -76,6 +76,10 @@ class PreProcess:
         self.y_train_seq = np.array(y_seq)
     
     def create_batches(self):
+        '''
+        Shape of X_train_batches: (num_batches, batch_size, seq_length, num_features)
+        :return:
+        '''
         # creates batches of the training sequences
         num_batches = len(self.X_train_seq) // self.batch_size
         self.X_train_batches = np.array_split(self.X_train_seq[:num_batches * self.batch_size], num_batches)
