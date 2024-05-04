@@ -40,19 +40,20 @@ def main():
 
 
     #file_path = sys.argv[1]
-    file_path = './AAPL.csv'
+    #file_path = './AAPL.csv'
+    file_url = 'https://raw.githubusercontent.com/daryaanbar/AAPL-Stock-Data/main/AAPL.csv'
     #train_split_size = sys.argv[2]
     #batch_size = sys.argv[3]
     #seq_length = sys.argv[4]
 
-    p = PreProcess(file_path, train_split_size=0.8, batch_size=32, seq_length=10)
+    p = PreProcess(file_url, train_split_size=0.8, batch_size=32, seq_length=10)
     p.preprocess_data()
     print(np.array(p.X_train_batches).shape)
     print(np.array(p.y_train_batches).shape)
     X_train = p.X_train_batches  # shape: (num_batches, batch_size, seq_length, num_features)
     y_train = p.y_train_batches  # shape: (num_batches, batch_size, 1)
 
-    model = RNN(X=X, y=y, num_layers=num_layers, num_neurons=num_neurons, seq_length=seq_length,
+    model = RNN(X=X_train, y=y_train, num_layers=num_layers, num_neurons=num_neurons, seq_length=seq_length,
                 num_features=num_features, num_batches=num_batches, learning_rate=learning_rate)
     model.rnn()
 

@@ -3,12 +3,14 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
+from io import StringIO
+import requests
 
 
 class PreProcess:
     
-    def __init__(self, file_path, train_split_size, batch_size, seq_length):
-        self.file_path = file_path
+    def __init__(self, file_url, train_split_size, batch_size, seq_length):
+        self.file_url = file_url
         # hyperparameters:
         self.train_split_size = train_split_size
         self.seq_length = seq_length
@@ -27,8 +29,13 @@ class PreProcess:
         self.y_train_batches = None
 
     def load_data(self):
-        data = pd.read_csv(self.file_path)
-        self.data = pd.DataFrame(data)
+        res = requests.get(self.file_url)
+        if res.ok:
+            csv_data = res.text
+            df = pd.read_csv(StringIO(csv_data))  # reads CSV data from string
+            self.data = pd.DataFrame(df)
+        else:
+            print(f"Failed to retrieve data: {res.status_code} - {res.reason}")
 
     def handle_missing_values(self):
         # remove rows with missing labels and reset indices
