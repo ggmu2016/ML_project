@@ -35,7 +35,7 @@ def main():
     seq_length = 10
     num_features = 6
     num_batches = 264
-    learning_rate = 0.001
+    learning_rate = 0.3
     train_split_size = 0.8
 
 
@@ -47,15 +47,14 @@ def main():
 
     p = PreProcess(file_path, train_split_size=0.8, batch_size=32, seq_length=10)
     p.preprocess_data()
-    X = p.X_train_batches
-    y = p.y_train_batches
-    #print(np.array(p.X_train_batches).shape)
-    #print(np.array(p.y_train_batches).shape)
+    print(np.array(p.X_train_batches).shape)
+    print(np.array(p.y_train_batches).shape)
+    X_train = p.X_train_batches  # shape: (num_batches, batch_size, seq_length, num_features)
+    y_train = p.y_train_batches  # shape: (num_batches, batch_size, 1)
+
     model = RNN(X=X, y=y, num_layers=num_layers, num_neurons=num_neurons, seq_length=seq_length,
                 num_features=num_features, num_batches=num_batches, learning_rate=learning_rate)
     model.rnn()
-    print(np.array(model.y_model).shape)
-    print(np.shape(y))
 
 
 if __name__ == "__main__":
