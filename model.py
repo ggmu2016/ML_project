@@ -31,9 +31,9 @@ def main():
     """
     # Model Parameters
     num_layers = 2
-    num_neurons = 6
+    num_neurons = 5
     seq_length = 10
-    num_features = 6
+    num_features = 5
     num_batches = 264
     learning_rate = 0.3
     train_split_size = 0.8

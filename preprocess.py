@@ -44,15 +44,15 @@ class PreProcess:
         df = df.dropna(subset=[df.columns[-1]]).reset_index(drop=True)
 
         # load features and labels
-        self.X = pd.DataFrame(df.iloc[:, :-1].values)
+        self.X = pd.DataFrame(df.iloc[:, 1:-1].values)
         self.y = pd.DataFrame(df.iloc[:, -1].values)
 
         # replace missing X values (numerical) using the median along each column
         imputer = SimpleImputer(strategy='median')
-        self.X.iloc[:, 1:] = imputer.fit_transform(self.X.iloc[:, 1:])
+        self.X = pd.DataFrame(imputer.fit_transform(self.X), columns=self.X.columns, index=self.X.index)
 
         # fill in missing dates appropriately
-        self.X[0] = self.X[0].replace("", None).ffill().bfill() # fills forward then backward
+        #self.X[0] = self.X[0].replace("", None).ffill().bfill() # fills forward then backward
 
     def transform_dates(self):
         # encodes dates sequentially, starting from 0...
@@ -95,7 +95,7 @@ class PreProcess:
     def preprocess_data(self):
         self.load_data()
         self.handle_missing_values()
-        self.transform_dates()
+        #self.transform_dates()
         self.split_data()
         self.normalize()
         self.create_sequences()
