@@ -75,16 +75,19 @@ class RNN:
         dW_hy += np.array(self.hidden_states[-1])*do_t  # same as dW_hy
         db_hy = do_t
         dh_t = do_t*self.W_hy
+        print('dh_t init shape: ', np.shape(dh_t))
 
         # Propagating error backwards through the length of the sequence
         for t in reversed(range(self.seq_length)):
             h_t = self.hidden_states[t]
+            print('(1 - (h_t * h_t) shape: ', np.shape((1 - (h_t * h_t))))
             da_t = dh_t*(1 - (h_t * h_t))
             db_hh += da_t
             dW_xh += np.dot(np.array([X_seq[t]]).T, np.array([da_t]))
             if t != 0:
                 dW_hh += np.dot(np.array([da_t]).T, np.array([self.hidden_states[t - 1]]))
-                dh_t = np.dot([da_t], self.W_hh.T)
+                dh_t = np.dot([da_t], self.W_hh)
+                dh_t = np.squeeze(dh_t)
         self.update_weights(dW_xh, dW_hh, dW_hy, db_hh, db_hy)
 
     def calc_loss(self, y_target, y_model, loss_function="MSE"):
