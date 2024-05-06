@@ -3,6 +3,7 @@ from preprocess import PreProcess
 from rnn import RNN
 import numpy as np
 from sklearn.metrics import mean_squared_error as MSE
+import matplotlib.pyplot as plt
 
 
 class Model:
@@ -44,7 +45,12 @@ class Model:
         return mse
 
     def test(self):
-        y_model_test = self.model.test(self.X_test)
+        y_model_test = np.array(self.model.test(self.X_test)).flatten()
+        plt.plot(range(len(y_model_test)), np.array(self.y_test).flatten()[0:2110][0::10], label='True')
+        plt.plot(range(len(y_model_test)), np.array(y_model_test).flatten(), label='Model')
+        plt.title("Test Data")
+        plt.legend()
+        plt.show()
 
 
 
@@ -59,10 +65,10 @@ def main():
     train_test_split = 0.8
     seq_length = 10
     num_features = 4
-    learning_rate = 0.01
+    learning_rate = 0.05
     epochs = 10
     batch_size = 32
-    num_neurons = 10
+    num_neurons = 4
 
     # file_path = sys.argv[1]
     # file_path = './AAPL.csv'
@@ -74,8 +80,9 @@ def main():
                       seq_length=seq_length, train_test_split=train_test_split, num_neurons=num_neurons)
 
     train_accuracy = rnn_model.train()
-    print(train_accuracy)
 
+    print(train_accuracy)
+    rnn_model.test()
 
 if __name__ == "__main__":
     main()

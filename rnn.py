@@ -9,6 +9,7 @@ This file will contain the rnn class and its methods
 
 import numpy as np
 from sklearn.metrics import mean_squared_error as MSE
+import matplotlib.pyplot as plt
 
 class RNN:
     def __init__(self, X, y, num_neurons, seq_length, num_features, batch_size, learning_rate):
@@ -79,7 +80,6 @@ class RNN:
         # Propagating error backwards through the length of the sequence
         for t in reversed(range(self.seq_length)):
             h_t = self.hidden_states[t]
-            #print('(1 - (h_t * h_t) shape: ', np.shape((1 - (h_t * h_t))))
             da_t = dh_t*(1 - (h_t * h_t))
             db_hh += da_t
             dW_xh += np.dot(np.array([X_seq[t]]).T, [da_t])
@@ -88,6 +88,13 @@ class RNN:
                 dh_t = np.dot([da_t], self.W_hh)
                 dh_t = np.squeeze(dh_t)
         self.update_weights(dW_xh, dW_hh, dW_hy, db_hh, db_hy)
+
+    def set_random_zero(self, arr):
+        shape = arr.shape
+        idx = np.random.choice(arr.size)
+        flat_arr = arr.flatten()
+        flat_arr[idx] = 0
+        return flat_arr.reshape(shape)
 
     def calc_loss(self, y_target, y_model, loss_function="MSE"):
         if loss_function == "MSE":
@@ -119,6 +126,13 @@ class RNN:
                     self.back_prop(X_seq, y_out, dL)
                     y_model_seq.append(y_out)
                 self.y_model.append(y_model_seq)
+            if epochs == num_epochs-1:
+                plt.plot(range(len(y_seq_arr)), y_seq_arr, label='True')
+                plt.plot(range(len(y_seq_arr)), np.array(self.y_model).flatten(), label='Model')
+                plt.legend()
+                plt.title("Train Data")
+                # dec 12 1980 to dec 12 2022
+                plt.show()
             loss_per_epoch.append(MSE(y_seq_arr, np.array(self.y_model).flatten()))
             print("Epoch %d : %f" % (epochs, loss_per_epoch[-1]))
 
@@ -126,7 +140,10 @@ class RNN:
         y_model_test = []
         period = self.seq_length
         for x in range(len(X_test)//period+1):
-            X_seq = X_test[x*period:(x+1)*period]
+            X_seq = X_test[x * period:(x + 1) * period]
+            if len(X_seq) != 10:
+                break
             y_model_test.append(self.forward_prop(X_seq))
+
         return y_model_test
 
