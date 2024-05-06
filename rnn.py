@@ -8,20 +8,18 @@ This file will contain the rnn class and its methods
 '''
 
 import numpy as np
-
+from sklearn.metrics import mean_squared_error as MSE
 
 class RNN:
-
-    def __init__(self, X, y, num_layers, num_neurons, seq_length, num_features, num_batches, learning_rate):
+    def __init__(self, X, y, num_neurons, seq_length, num_features, batch_size, learning_rate):
         self.X = X  # shape: (num_batches, batch_size, seq_length, num_features)
         self.y = y  # shape: (num_batches, batch_size, 1)
-        self.num_layers = num_layers
         self.num_neurons = num_neurons
         self.seq_length = seq_length
         self.num_features = num_features
         self.num_outputs = np.shape(self.y)[-1]
-        self.num_batches = num_batches
-        self.batch_size = len(X) // num_batches
+        self.num_batches = len(X)
+        self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.W_xh = None
         self.W_hh = None
@@ -29,8 +27,8 @@ class RNN:
         self.b_hh = None
         self.b_hy = None
         self.hidden_states = None
-        self.y_model = []
-        self.__initialize_parameters(seed=50)
+        self.y_model = None
+        self.__initialize_parameters(seed=70)
 
     def __initialize_parameters(self, seed: int):
         np.random.seed(seed)
@@ -74,20 +72,19 @@ class RNN:
 
         # Last hidden node only
         do_t = dL * self.d_sigmoid(y_out)
-        dW_hy = np.array(self.hidden_states[-1])*do_t # same as dW_hy
+        dW_hy += np.array(self.hidden_states[-1])*do_t  # same as dW_hy
         db_hy = do_t
         dh_t = do_t*self.W_hy
-        dh_next = dh_t
-        for t in range(self.seq_length - 1, -1, -1):
+
+        # Propagating error backwards through the length of the sequence
+        for t in reversed(range(self.seq_length)):
             h_t = self.hidden_states[t]
-            da_t = (1 - (h_t * h_t))*dh_t
+            da_t = dh_t*(1 - (h_t * h_t))
             db_hh += da_t
-            dW_xh += np.dot(da_t, X_seq[t].T)
+            dW_xh += np.dot(np.array([X_seq[t]]).T, np.array([da_t]))
             if t != 0:
-                dW_hh += np.dot(da_t, self.hidden_states[t - 1].T)
-                dh_t = np.dot(self.W_hh.T, da_t)
-                if t == self.seq_length - 1:
-                    dh_t += dh_next
+                dW_hh += np.dot(np.array([da_t]).T, np.array([self.hidden_states[t - 1]]))
+                dh_t = np.dot([da_t], self.W_hh.T)
         self.update_weights(dW_xh, dW_hh, dW_hy, db_hh, db_hy)
 
     def calc_loss(self, y_target, y_model, loss_function="MSE"):
@@ -104,17 +101,28 @@ class RNN:
         self.b_hh -= self.learning_rate * db_hh
         self.b_hy -= self.learning_rate * db_hy
 
-    def rnn(self):
-        for batch in range(self.num_batches):
-            y_model_seq=[]
-            for seq in range(self.batch_size):
-                X_seq = self.X[batch][seq]
-                y_seq = self.y[batch][seq][0]
-                y_out = self.forward_prop(X_seq)
-                L, dL = self.calc_loss(y_target=y_seq, y_model=y_out)
-                self.back_prop(X_seq, y_out, dL)
-                y_model_seq.append(y_out)
-                print('y_seq: ', y_seq)
-                print('y_out: ', y_out)
-            self.y_model.append(y_model_seq)
+    def train(self, num_epochs):
+        loss_per_epoch = []
+        for epochs in range(num_epochs):
+            self.y_model = []
+            for batch in range(self.num_batches):
+                y_model_seq=[]
+                for seq in range(self.batch_size):
+                    X_seq = self.X[batch][seq]
+                    y_seq = self.y[batch][seq][0]
+                    y_out = self.forward_prop(X_seq)
+                    L, dL = self.calc_loss(y_target=y_seq, y_model=y_out)
+                    self.back_prop(X_seq, y_out, dL)
+                    y_model_seq.append(y_out)
+                self.y_model.append(y_model_seq)
+            #loss_per_epoch.append()
+            #print("Epoch %d : %f" % (epochs, loss_per_epoch[-1]))
+
+    def test(self, X_test):
+        y_model_test = []
+        period = self.seq_length
+        for x in range(len(X_test)//period+1):
+            X_seq = X_test[x*period:(x+1)*period]
+            y_model_test.append(self.forward_prop(X_seq))
+        return y_model_test
 
