@@ -11,12 +11,15 @@ class PreProcess:
     
     def __init__(self, file_url, train_split_size, batch_size, seq_length):
         self.file_url = file_url
-        # hyperparameters:
         self.train_split_size = train_split_size
         self.seq_length = seq_length
         self.batch_size = batch_size
+        self.scaler = MinMaxScaler()
         # data:
         self.data = None    # original dataset
+        self.dates = None   # original dates
+        self.dates_train = None
+        self.dates_test = None
         self.X = None
         self.y = None
         self.X_train = None
@@ -46,31 +49,31 @@ class PreProcess:
         # load features and labels
         self.X = pd.DataFrame(df.iloc[:, 1:-1].values)
         self.y = pd.DataFrame(df.iloc[:, -1].values)
+        self.dates = pd.DataFrame(df.iloc[:, :1].values) # store dates separately
 
         # replace missing X values (numerical) using the median along each column
         imputer = SimpleImputer(strategy='median')
         self.X = pd.DataFrame(imputer.fit_transform(self.X), columns=self.X.columns, index=self.X.index)
 
-        # fill in missing dates appropriately
-        #self.X[0] = self.X[0].replace("", None).ffill().bfill() # fills forward then backward
-
-    def transform_dates(self):
-        # encodes dates sequentially, starting from 0...
-        label_encoder = LabelEncoder()
-        self.X[0] = pd.to_datetime(self.X[0], format='%d-%m-%Y')
-        self.X[0] = label_encoder.fit_transform(self.X[0])
-
     def split_data(self):
         # splits data into training and testing sets, maintaining sequential order
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, train_size = self.train_split_size, shuffle=False)
+        self.dates_train, self.dates_test = train_test_split(self.dates, train_size = self.train_split_size, shuffle=False)
     
     def normalize(self):
         # rescales training and test data to [0, 1]
-        scaler = MinMaxScaler()
-        self.X_train = scaler.fit_transform(self.X_train)
-        self.X_test = scaler.fit_transform(self.X_test)
-        self.y_train = scaler.fit_transform(self.y_train)
-        self.y_test = scaler.fit_transform(self.y_test)
+        self.X_train = self.scaler.fit_transform(self.X_train)
+        self.X_test = self.scaler.fit_transform(self.X_test)
+        self.y_train = self.scaler.fit_transform(self.y_train)
+        self.y_test = self.scaler.fit_transform(self.y_test)
+
+    def denormalize(self, norm_data):
+        og_shape = np.array(norm_data).shape
+        norm_data_2d = np.reshape(norm_data, (-1, 1))  # convert to 2d array format
+        denorm_data = self.scaler.inverse_transform(norm_data_2d)
+        denorm_data = np.reshape(denorm_data, og_shape) # convert back to og shape
+        print(denorm_data)
+        return denorm_data  # np array
 
     def create_sequences(self):
         # iterates over training data using sliding window approach
@@ -95,7 +98,6 @@ class PreProcess:
     def preprocess_data(self):
         self.load_data()
         self.handle_missing_values()
-        #self.transform_dates()
         self.split_data()
         self.normalize()
         self.create_sequences()
