@@ -51,7 +51,6 @@ class RNN:
         outputs = []
         self.hidden_states = []
         h_t = np.zeros((self.num_neurons,))
-
         for t in range(self.seq_length):
             a_t = self.b_hh + np.dot(X_seq[t], self.W_xh) + np.dot(h_t, self.W_hh)
             h_t = np.tanh(a_t)
@@ -75,15 +74,15 @@ class RNN:
         dW_hy += np.array(self.hidden_states[-1])*do_t  # same as dW_hy
         db_hy = do_t
         dh_t = do_t*self.W_hy
-        print('dh_t init shape: ', np.shape(dh_t))
+        #print('dh_t init shape: ', np.shape(dh_t))
 
         # Propagating error backwards through the length of the sequence
         for t in reversed(range(self.seq_length)):
             h_t = self.hidden_states[t]
-            print('(1 - (h_t * h_t) shape: ', np.shape((1 - (h_t * h_t))))
+            #print('(1 - (h_t * h_t) shape: ', np.shape((1 - (h_t * h_t))))
             da_t = dh_t*(1 - (h_t * h_t))
             db_hh += da_t
-            dW_xh += np.dot(np.array([X_seq[t]]).T, np.array([da_t]))
+            dW_xh += np.dot(np.array([X_seq[t]]).T, [da_t])
             if t != 0:
                 dW_hh += np.dot(np.array([da_t]).T, np.array([self.hidden_states[t - 1]]))
                 dh_t = np.dot([da_t], self.W_hh)
@@ -108,18 +107,20 @@ class RNN:
         loss_per_epoch = []
         for epochs in range(num_epochs):
             self.y_model = []
+            y_seq_arr = []
             for batch in range(self.num_batches):
                 y_model_seq=[]
                 for seq in range(self.batch_size):
                     X_seq = self.X[batch][seq]
                     y_seq = self.y[batch][seq][0]
+                    y_seq_arr.append(y_seq)
                     y_out = self.forward_prop(X_seq)
                     L, dL = self.calc_loss(y_target=y_seq, y_model=y_out)
                     self.back_prop(X_seq, y_out, dL)
                     y_model_seq.append(y_out)
                 self.y_model.append(y_model_seq)
-            #loss_per_epoch.append()
-            #print("Epoch %d : %f" % (epochs, loss_per_epoch[-1]))
+            loss_per_epoch.append(MSE(y_seq_arr, np.array(self.y_model).flatten()))
+            print("Epoch %d : %f" % (epochs, loss_per_epoch[-1]))
 
     def test(self, X_test):
         y_model_test = []

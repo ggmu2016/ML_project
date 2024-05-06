@@ -58,11 +58,11 @@ def main():
     # Model Parameters
     train_test_split = 0.8
     seq_length = 10
-    num_features = 5
-    learning_rate = 0.3
-    epochs = 20
+    num_features = 4
+    learning_rate = 0.01
+    epochs = 10
     batch_size = 32
-    num_neurons = 20
+    num_neurons = 10
 
     # file_path = sys.argv[1]
     # file_path = './AAPL.csv'

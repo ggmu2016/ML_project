@@ -47,8 +47,8 @@ class PreProcess:
         df = df.dropna(subset=[df.columns[-1]]).reset_index(drop=True)
 
         # load features and labels
-        self.X = pd.DataFrame(df.iloc[:, 1:-1].values)
-        self.y = pd.DataFrame(df.iloc[:, -1].values)
+        self.X = pd.DataFrame(df.iloc[:, 1:-2].values)
+        self.y = pd.DataFrame(df.iloc[:, -2].values)
         self.dates = pd.DataFrame(df.iloc[:, :1].values) # store dates separately
 
         # replace missing X values (numerical) using the median along each column
