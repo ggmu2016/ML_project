@@ -70,8 +70,9 @@ class PreProcess:
     def denormalize(self, norm_data):
         og_shape = np.array(norm_data).shape
         norm_data_2d = np.reshape(norm_data, (-1, 1))  # convert to 2d array format
-        denorm_data = self.scaler.inverse_transform(norm_data)
+        denorm_data = self.scaler.inverse_transform(norm_data_2d)
         denorm_data = np.reshape(denorm_data, og_shape) # convert back to og shape
+        print(denorm_data)
         return denorm_data  # np array
 
     def create_sequences(self):
