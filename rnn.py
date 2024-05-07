@@ -1,11 +1,3 @@
-'''
-This file will contain the rnn class and its methods
-- initalize_parameters
-- forward_pass
-- backward_pass
-- calculate_loss
-- optimize
-'''
 
 import numpy as np
 from sklearn.metrics import mean_squared_error as MSE
@@ -75,7 +67,6 @@ class RNN:
         dW_hy += np.array(self.hidden_states[-1])*do_t  # same as dW_hy
         db_hy = do_t
         dh_t = do_t*self.W_hy
-        #print('dh_t init shape: ', np.shape(dh_t))
 
         # Propagating error backwards through the length of the sequence
         for t in reversed(range(self.seq_length)):
@@ -126,13 +117,6 @@ class RNN:
                     self.back_prop(X_seq, y_out, dL)
                     y_model_seq.append(y_out)
                 self.y_model.append(y_model_seq)
-            if epochs == num_epochs-1:
-                plt.plot(range(len(y_seq_arr)), y_seq_arr, label='True')
-                plt.plot(range(len(y_seq_arr)), np.array(self.y_model).flatten(), label='Model')
-                plt.legend()
-                plt.title("Train Data")
-                # dec 12 1980 to dec 12 2022
-                plt.show()
             loss_per_epoch.append(MSE(y_seq_arr, np.array(self.y_model).flatten()))
             print("Epoch %d : %f" % (epochs, loss_per_epoch[-1]))
 
@@ -141,7 +125,7 @@ class RNN:
         period = self.seq_length
         for x in range(len(X_test)//period+1):
             X_seq = X_test[x * period:(x + 1) * period]
-            if len(X_seq) != 10:
+            if len(X_seq) != self.seq_length:
                 break
             y_model_test.append(self.forward_prop(X_seq))
 
