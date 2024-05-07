@@ -1,7 +1,5 @@
-import sys
 
 from matplotlib import ticker
-
 from preprocess import PreProcess
 from rnn import RNN
 import numpy as np
@@ -83,19 +81,17 @@ class Model:
 
 
 def main():
-
-    #################### ENTER  ####################
+    num_features = 4
+    #################### ENTER  ###########################
     ################# MODEL PARAMETERS #####################
     train_test_split = 0.8
     seq_length = 10
-    num_features = 4
-    learning_rate = 0.05
-    epochs = 15
+    learning_rate = 0.1
+    epochs = 10
     batch_size = 32
-    num_neurons = 4
+    num_neurons = 20
     #######################################################
     #######################################################
-
     rnn_model = Model(epochs=epochs, learning_rate=learning_rate, num_features=num_features, batch_size=batch_size,
                       seq_length=seq_length, train_test_split=train_test_split, num_neurons=num_neurons)
 
