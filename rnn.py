@@ -1,7 +1,6 @@
 
 import numpy as np
 from sklearn.metrics import mean_squared_error as MSE
-import matplotlib.pyplot as plt
 
 class RNN:
     def __init__(self, X, y, num_neurons, seq_length, num_features, batch_size, learning_rate):
